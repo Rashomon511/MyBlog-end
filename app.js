@@ -1,5 +1,10 @@
 var express = require('express');
 var path = require('path');
+
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+var settings   = require('./setting');
+
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -21,6 +26,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret : settings.cookieSecret,
+    key    : settings.db,
+    resave: true,
+    saveUninitialized: true,
+    cookie : {maxAge:1000*60*60*24*30},
+    store  : new MongoStore({
+        //db : settings.db
+        url:'mongodb://localhost/' + settings.db
+    })
+}));
 
 app.use('/', index);
 app.use('/users', users);
