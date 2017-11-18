@@ -2,13 +2,12 @@ var express = require('express');
 var path = require('path');
 
 var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-var settings   = require('./setting');
 
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -24,20 +23,31 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(cookieParser('express_react_cookie'));
 app.use(session({
-    secret : settings.cookieSecret,
-    key    : settings.db,
+    secret : 'express_react_cookie',
     resave: true,
     saveUninitialized: true,
-    cookie : {maxAge:1000*60*60*24*30},
-    store  : new MongoStore({
-        //db : settings.db
-        url:'mongodb://localhost/' + settings.db
-    })
+    cookie : {maxAge:1000*60*60*24*30}
 }));
+
+//允许跨域
+app.all('*', function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, access-token, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+    res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+    next();
+});
+
+mongoose.connect('mongodb://localhost/Blog', function(err, res) {
+    if (err) {
+        console.log('ERROR: connecting to Database. ' + err);
+    } else {
+        console.log('Connected to Database');
+    }
+});
 
 app.use('/', index);
 app.use('/users', users);
