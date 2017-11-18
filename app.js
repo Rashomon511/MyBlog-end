@@ -41,7 +41,7 @@ app.all('*', function(req, res, next) {
     next();
 });
 
-mongoose.connect('mongodb://localhost/Blog', function(err, res) {
+mongoose.connect('mongodb://localhost/Blog',{useMongoClient: true}, function(err, res) {
     if (err) {
         console.log('ERROR: connecting to Database. ' + err);
     } else {
