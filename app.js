@@ -10,7 +10,6 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
 var index = require('./routes/index');
-var users = require('./routes/users');
 
 var app = express();
 
@@ -23,9 +22,11 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser(''));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cookieParser('express_react_cookie'));
+app.use('/', index);
+
 app.use(session({
     secret : 'express_react_cookie',
     resave: true,
@@ -41,7 +42,7 @@ app.all('*', function(req, res, next) {
     next();
 });
 
-mongoose.connect('mongodb://localhost/Blog',{useMongoClient: true}, function(err, res) {
+mongoose.connect('mongodb://localhost:27017/Blog',{useMongoClient: true}, function(err, res) {
     if (err) {
         console.log('ERROR: connecting to Database. ' + err);
     } else {
@@ -49,8 +50,7 @@ mongoose.connect('mongodb://localhost/Blog',{useMongoClient: true}, function(err
     }
 });
 
-app.use('/', index);
-app.use('/users', users);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -69,5 +69,20 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+// Environment sets...
+var debug = require('debug')('my-application'); // debug模块
+app.set('port', process.env.PORT || 3000); // 设定监听端口
+
+// Environment sets...
+
+//module.exports = app; //这是 4.x 默认的配置，分离了 app 模块,将它注释即可，上线时可以重新改回来
+
+//启动监听
+var server = app.listen(app.get('port'), function() {
+    debug('Express server listening on port ' + server.address().port);
+});
+//module.exports = app; //这是 4.x 默认的配置，分离了 app 模块,将它注释即可，上线时可以重新改回来
+
+
 
 module.exports = app;
