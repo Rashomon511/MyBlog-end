@@ -15,11 +15,4 @@ var models = {
     articleLabel: mongoose.model('articleLabel', articleLabel)
 };
 
-var users= new models.user({
-    userName: '12211',
-    password: '1dd11'
-});
-
-users.save()
-
 module.exports = models;

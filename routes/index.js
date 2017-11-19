@@ -6,11 +6,9 @@ const user=models.user;
 
 
 router.get('/', function(req, res, next) {
-    console.log(1111)
     user.find({},function(err,doc){
-        console.log(doc)
+        res.render('index', { title: doc });
     })
-  res.render('index', { title: 'Express' });
 });
 
 module.exports = router;
