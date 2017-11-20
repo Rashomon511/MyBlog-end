@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-
 var session = require('express-session');
 
 var favicon = require('serve-favicon');
@@ -10,6 +9,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
 var index = require('./routes/index');
+
 
 var app = express();
 

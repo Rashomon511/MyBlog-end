@@ -5,6 +5,7 @@ const articleComment = require('./articleComment');
 const resume = require('./resume');
 const tags = require('./tags');
 const articleLabel = require('./articleLabel');
+const md5=require('md5');
 
 var models = {
     user: mongoose.model('user', user),

@@ -13,6 +13,7 @@
     "ejs": "~2.5.7",
     "express": "~4.15.5",
     "express-session": "^1.15.6",
+    "jsonwebtoken": "^8.1.0",
     "md5": "^2.2.1",
     "moment": "^2.19.2",
     "mongodb": "^2.2.33",
