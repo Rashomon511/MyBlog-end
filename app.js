@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(''));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+
 
 app.use(session({
     secret : 'express_react_cookie',
@@ -41,6 +41,8 @@ app.all('*', function(req, res, next) {
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
     next();
 });
+
+app.use('/', index);
 
 mongoose.connect('mongodb://localhost:27017/Blog',{useMongoClient: true}, function(err, res) {
     if (err) {
@@ -71,7 +73,7 @@ app.use(function(err, req, res, next) {
 });
 // Environment sets...
 var debug = require('debug')('my-application'); // debug模块
-app.set('port', process.env.PORT || 3000); // 设定监听端口
+app.set('port', process.env.PORT || 3001); // 设定监听端口
 
 // Environment sets...
 

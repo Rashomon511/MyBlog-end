@@ -32,6 +32,18 @@ const token = (req, res, next) => {
     })
 }
 
+router.get('/user',async(req,res)=>{
+    try{
+        console.log(req)
+        let data = await user.find();
+        res.json({ code: 200, msg: '登录成功', data:data });
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+})
+
 router.post('/login', async(req, res)=>{
     try{
         const userName=req.body.userName;
