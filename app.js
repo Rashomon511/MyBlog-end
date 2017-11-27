@@ -27,12 +27,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 
-app.use(session({
-    secret : 'express_react_cookie',
-    resave: true,
-    saveUninitialized: true,
-    cookie : {maxAge:1000*60*60*24*30}
-}));
+// app.use(session({
+//     secret : 'express_react_cookie',
+//     resave: true,
+//     saveUninitialized: true,
+//     cookie : {maxAge:1000*60*60*24*30}
+// }));
 
 //允许跨域
 app.all('*', function(req, res, next) {

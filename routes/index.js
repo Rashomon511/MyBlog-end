@@ -30,25 +30,14 @@ const token = (req, res, next) => {
             next()
         }
     })
-}
-
-router.get('/user',async(req,res)=>{
-    try{
-        console.log(req)
-        let data = await user.find();
-        res.json({ code: 200, msg: '登录成功', data:data });
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-})
+};
 
 router.post('/login', async(req, res)=>{
     try{
+        console.log(req.query)
         const userName=req.body.userName;
         const password=req.body.password;
-        let data = await user.find({ uerName: userName, password: md5(password) })
+        let data = await user.find({ uerName: userName, password: md5(password) });
         console.log(data);
         if (data.length > 0) {
             //生成token 时间一周
