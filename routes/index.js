@@ -11,12 +11,11 @@ const resume=models.resume;
 const tags=models.tags;
 const articleLabel=models.articleLabel;
 
-const decodeToken = (token, cb) => {
+const decodeToken = (token) => {
     try {
         jwt.verify(token, secret);
-        cb(true)
     } catch (err) {
-        cb(false)
+        console.log(err)
     }
 } //需要token的中间件
 const token = (req, res, next) => {
@@ -34,14 +33,12 @@ const token = (req, res, next) => {
 
 router.post('/login', async(req, res)=>{
     try{
-        console.log(req.query)
         const userName=req.body.userName;
         const password=req.body.password;
-        let data = await user.find({ uerName: userName, password: md5(password) });
-        console.log(data);
+        let data = await user.find({userName: userName, password: md5(password)});
         if (data.length > 0) {
             //生成token 时间一周
-            let token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), name: name, password: password }, secret);
+            let token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), userName: userName, password: password }, secret);
             res.json({ code: 200, msg: '登录成功', token: token });
             console.log(decodeToken(token))
         } else {
