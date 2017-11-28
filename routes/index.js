@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const models = require('../models/index');
 const jwt = require('jsonwebtoken'); //jwt-token
-const secret='rashomon_js_wh';
+const secret='rashomon_wh';
 const md5=require('md5');
 const user=models.user;
 const article=models.article;
@@ -11,11 +11,13 @@ const resume=models.resume;
 const tags=models.tags;
 const articleLabel=models.articleLabel;
 
-const decodeToken = (token) => {
+const decodeToken = (token,callback) => {
     try {
         jwt.verify(token, secret);
+        callback(true)
     } catch (err) {
         console.log(err)
+        callback(false)
     }
 } //需要token的中间件
 const token = (req, res, next) => {
@@ -40,7 +42,7 @@ router.post('/login', async(req, res)=>{
             //生成token 时间一周
             let token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), userName: userName, password: password }, secret);
             res.json({ code: 200, msg: '登录成功', token: token });
-            console.log(decodeToken(token))
+            console.log(jwt.verify(token, secret))
         } else {
             res.json({ code: 400, msg: '账号密码错误' });
         }
