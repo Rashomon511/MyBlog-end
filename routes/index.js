@@ -100,6 +100,37 @@ router.post('/deleteTags',FindToken,  async(req,res)=>{
     }
 });
 
+// 获取简历
+router.get('/getResume', async(req,res)=>{
+    try {
+        let data= await resume.find();
+        res.json({ data: data, code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+// 提交简历
+router.post('/saveResume',FindToken, async(req,res)=>{
+    try {
+        let body=req.body;
+        let data={
+            content: body.content, //转换后显示的内容
+            //initContent: body.initContent //未转换的内容
+        };
+        await new resume(data).save();
+        res.json({ data: '', code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+
+
 router.post('/saveArticle', async(req,res)=>{
     try {
         let body=req.body;
@@ -184,32 +215,9 @@ router.get('/getComment', async(req,res)=>{
     }
 });
 
-router.get('/getResume', async(req,res)=>{
-    try {
-        let data=await resume().find();
-        res.json({ data: data, code: 200, msg: '成功' })
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-});
 
-router.post('/saveResume', async(req,res)=>{
-    try {
-        let body=req.body;
-        let data={
-            content: body.content, //转换后显示的内容
-            initContent: body.initContent //未转换的内容
-        };
-        await new resume(data).save();
-        res.json({ data: '', code: 200, msg: '成功' })
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-});
+
+
 
 
 
