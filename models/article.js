@@ -5,6 +5,6 @@ module.exports = new mongoose.Schema({
     title: String,
     tags: Array,
     draft: { type: Boolean, default: false },
-    abstract: String,
+    //abstract: String,
     content: String,
 });

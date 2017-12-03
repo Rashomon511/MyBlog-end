@@ -129,18 +129,17 @@ router.post('/saveResume',FindToken, async(req,res)=>{
     }
 });
 
-
-
 router.post('/saveArticle', async(req,res)=>{
     try {
         let body=req.body;
         let data={
-            date: body.data,
+            date: body.date,
             title: body.title,
             draft: body.draft,
-            abstract: body.abstract,
-            content: content,
-            initContent: initContent
+            tags: body.tags,
+            //abstract: body.abstract,
+            content: body.content,
+            //initContent: initContent
         }
         await new article(data).save();
         res.json({ data: '', code: 200, msg: '成功' })
@@ -153,7 +152,7 @@ router.post('/saveArticle', async(req,res)=>{
 
 router.get('/getArticle', async(req,res)=>{
     try {
-        let data=await article().find();
+        let data=await article.find();
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
