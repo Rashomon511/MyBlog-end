@@ -19,10 +19,11 @@ const decodeToken = (token,callback) => {
         console.log(err)
         callback(false)
     }
-} //需要token的中间件
-const token = (req, res, next) => {
-    let token = req.headers['access-token'];
-    console.log(token);
+};
+
+//需要验证token的中间件
+const FindToken = (req, res, next) => {
+    let token = req.headers['authorization'];
     decodeToken(token, type => {
         if (!type) {
             //token过期
@@ -41,13 +42,59 @@ router.post('/login', async(req, res)=>{
         if (data.length > 0) {
             //生成token 时间一周
             let token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), userName: userName, password: password }, secret);
-            res.json({ code: 200, msg: '登录成功', token: token });
-            console.log(jwt.verify(token, secret))
+
+            res.json({ code: 200, msg: '登录成功', result: {token: token, auth: data[0].auth }  });
         } else {
             res.json({ code: 400, msg: '账号密码错误' });
         }
     }
     catch(err) {
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+// 获取标签
+router.get('/getTags', async(req,res)=>{
+    try {
+        let data=await tags.find();
+        res.json({ data: data, code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+// 新建标签
+router.post('/createTags',FindToken,  async(req,res)=>{
+    try {
+        let body=req.body;
+        let data={
+            content: body.content
+        };
+        let tag = await tags.find(data);
+        if(tag.length === 0){
+            await new tags(data).save();
+            res.json({ data: '', code: 200, msg: '成功' })
+        }else{
+            res.json({ data: '', code: 200, msg: '成功' })
+        }
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+// 删除标签
+router.post('/deleteTags',FindToken,  async(req,res)=>{
+    try {
+        let body=req.body;
+        await tags.find({_id: body.id}).remove();
+        res.json({ data: '', code: 200, msg: '成功' })
+    }
+    catch (err){
         console.log(err);
         res.json({ data: '', code: 500, msg: '服务器错误' })
     }
@@ -98,32 +145,6 @@ router.post('/updateArticle', async(req,res)=>{
         }
         await article.findByIdAndUpdate(articleId,data)
         res.json({ data: '', code: 200, msg: '成功' })
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-});
-
-router.get('/getTags', async(req,res)=>{
-    try {
-        let data=await tags().find();
-        res.json({ data: data, code: 200, msg: '成功' })
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-});
-
-router.post('/saveTags', async(req,res)=>{
-    try {
-        let body=req.body;
-        let data={
-            content: body.content
-        };
-        await new tags(data).save();
-        res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);

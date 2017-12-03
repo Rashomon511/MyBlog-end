@@ -16,4 +16,6 @@ var models = {
     articleLabel: mongoose.model('articleLabel', articleLabel)
 };
 
+// new models.user({userName: 'visitor', password: md5('123456'), auth: false }).save()
+
 module.exports = models;
