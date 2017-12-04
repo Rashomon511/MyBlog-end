@@ -129,6 +129,7 @@ router.post('/saveResume',FindToken, async(req,res)=>{
     }
 });
 
+// 保存文章
 router.post('/saveArticle', async(req,res)=>{
     try {
         let body=req.body;
@@ -150,10 +151,23 @@ router.post('/saveArticle', async(req,res)=>{
     }
 });
 
+// 获取文章
 router.get('/getArticle', async(req,res)=>{
     try {
         let data=await article.find();
         res.json({ data: data, code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+router.get('/deleteArticle', async(req,res)=>{
+    try {
+        console.log(req.query.id);
+        await article.find({_id: req.query.id}).remove();
+        res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);
