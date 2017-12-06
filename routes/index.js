@@ -186,8 +186,8 @@ router.post('/updateArticle', async(req,res)=>{
             abstract: body.abstract,
             content: content,
             initContent: initContent
-        }
-        await article.findByIdAndUpdate(articleId,data)
+        };
+        await article.findByIdAndUpdate(articleId,data);
         res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
