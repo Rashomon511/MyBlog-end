@@ -130,7 +130,7 @@ router.post('/saveResume',FindToken, async(req,res)=>{
 });
 
 // 保存文章
-router.post('/saveArticle', async(req,res)=>{
+router.post('/saveArticle',FindToken, async(req,res)=>{
     try {
         let body=req.body;
         let data={
@@ -138,7 +138,7 @@ router.post('/saveArticle', async(req,res)=>{
             title: body.title,
             draft: body.draft,
             tags: body.tags,
-            //abstract: body.abstract,
+            abstract: body.abstract,
             content: body.content,
             //initContent: initContent
         }
@@ -163,7 +163,7 @@ router.get('/getArticle', async(req,res)=>{
     }
 });
 
-router.get('/deleteArticle', async(req,res)=>{
+router.get('/deleteArticle', FindToken, async(req,res)=>{
     try {
         console.log(req.query.id);
         await article.find({_id: req.query.id}).remove();
@@ -175,7 +175,7 @@ router.get('/deleteArticle', async(req,res)=>{
     }
 });
 
-router.post('/updateArticle', async(req,res)=>{
+router.post('/updateArticle',FindToken, async(req,res)=>{
     try {
         let body=req.body;
         let articleId=body.id;
