@@ -214,6 +214,7 @@ router.get('/getArticleById', async(req,res)=>{
 
 router.get('/getArticleList', async(req,res)=>{
     try {
+        const page=req.query.page;
         let articles=await articleLabel.find({label_id: req.query.id});
         let list=[];
         for (let i = 0; i < articles.length; i++) {
@@ -224,7 +225,8 @@ router.get('/getArticleList', async(req,res)=>{
         list = list.length > 1 ? list.sort(function(a, b) {
             return new Date(b.date).getTime() - new Date(a.date).getTime()
         }):list;
-        res.json({ data: list, code: 200, msg: '成功' })
+        const data=list.slice((page-1)*10,page*10);
+        res.json({ data: {list:data,total:list.length}, code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);
