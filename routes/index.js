@@ -180,11 +180,17 @@ router.get('/getArticle', async(req,res)=>{
         const draft=req.query.draft;
         if(draft === 'false'){
             const total = await article.count({draft: draft});
-            const allData = await article.find({draft: draft});
+            let allData = await article.find({draft: draft});
+            allData = allData.sort(function(a, b) {
+                return new Date(b.date).getTime() - new Date(a.date).getTime()
+            });
             const data=allData.slice((page-1)*5,page*5);
             res.json({ data: {data: data,total: total}, code: 200, msg: '成功' })
         }else{
-            const allData=await article.find();
+            let allData=await article.find();
+            allData = allData.sort(function(a, b) {
+                return new Date(b.date).getTime() - new Date(a.date).getTime()
+            });
             const data=allData.slice((page-1)*10,page*10);
             res.json({ data: {data: data,total: allData.length}, code: 200, msg: '成功' })
         }
@@ -208,13 +214,16 @@ router.get('/getArticleById', async(req,res)=>{
 
 router.get('/getArticleList', async(req,res)=>{
     try {
-        let articles=await articleLabel.find({label_id: req.query.id})
+        let articles=await articleLabel.find({label_id: req.query.id});
         let list=[];
         for (let i = 0; i < articles.length; i++) {
             let item = articles[i],
                 query = await article.findOne({ _id: item.article_id,draft: false }).lean();
             list.push(query)
         }
+        list = list.length > 1 ? list.sort(function(a, b) {
+            return new Date(b.date).getTime() - new Date(a.date).getTime()
+        }):list;
         res.json({ data: list, code: 200, msg: '成功' })
     }
     catch (err){
@@ -225,8 +234,8 @@ router.get('/getArticleList', async(req,res)=>{
 
 router.get('/deleteArticle', FindToken, async(req,res)=>{
     try {
-        console.log(req.query.id);
         await article.find({_id: req.query.id}).remove();
+        await articleLabel.find({article_id:req.query.id}).remove();
         res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
