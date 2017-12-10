@@ -16,7 +16,7 @@ const decodeToken = (token,callback) => {
         jwt.verify(token, secret);
         callback(true)
     } catch (err) {
-        console.log(err)
+        console.log(err);
         callback(false)
     }
 };
@@ -103,7 +103,7 @@ router.post('/deleteTags',FindToken,  async(req,res)=>{
 // 获取简历
 router.get('/getResume', async(req,res)=>{
     try {
-        let data= await resume.find();
+        let data= await resume.findOne();
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
@@ -116,11 +116,11 @@ router.get('/getResume', async(req,res)=>{
 router.post('/saveResume',FindToken, async(req,res)=>{
     try {
         let body=req.body;
+        let id=body.id;
         let data={
             content: body.content, //转换后显示的内容
-            //initContent: body.initContent //未转换的内容
         };
-        await new resume(data).save();
+        await resume.findByIdAndUpdate(id, data);
         res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
@@ -132,18 +132,40 @@ router.post('/saveResume',FindToken, async(req,res)=>{
 // 保存文章
 router.post('/saveArticle',FindToken, async(req,res)=>{
     try {
-        let body=req.body;
-        let data={
+        const body=req.body;
+        const id = req.body.id;
+        const data={
             date: body.date,
             title: body.title,
             draft: body.draft,
             tags: body.tags,
             abstract: body.abstract,
             content: body.content,
-            //initContent: initContent
+        };
+        if(id===''){
+            await new article(data).save();
+            const findData = await article.find();
+            const article_id = findData[findData.length - 1]._id;
+            const allTags=await tags.find();
+            const tag=allTags.filter((item)=>{
+                return body.tags.indexOf(item.content) !== -1
+            });
+            tag.forEach(async(item) => {
+                await new articleLabel({ article_id: article_id, label_id: item._id }).save()
+            });
+            res.json({ data: '', code: 200, msg: '成功' })
+        }else {
+            await article.findByIdAndUpdate(id, data);
+            await articleLabel.find().remove({ article_id: id });
+            const allTags=await tags.find();
+            const tag=allTags.filter((item)=>{
+                return body.tags.indexOf(item.content) !== -1
+            });
+            tag.forEach(async(item) => {
+                await new articleLabel({ article_id: id, label_id: item._id }).save()
+            });
+            res.json({ data: '', code: 200, msg: '成功' })
         }
-        await new article(data).save();
-        res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);
@@ -154,8 +176,46 @@ router.post('/saveArticle',FindToken, async(req,res)=>{
 // 获取文章
 router.get('/getArticle', async(req,res)=>{
     try {
-        let data=await article.find();
+        const page=req.query.page;
+        const draft=req.query.draft;
+        if(draft === 'false'){
+            const total = await article.count({draft: draft});
+            const allData = await article.find({draft: draft});
+            const data=allData.slice((page-1)*5,page*5);
+            res.json({ data: {data: data,total: total}, code: 200, msg: '成功' })
+        }else{
+            const allData=await article.find();
+            const data=allData.slice((page-1)*10,page*10);
+            res.json({ data: {data: data,total: allData.length}, code: 200, msg: '成功' })
+        }
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+router.get('/getArticleById', async(req,res)=>{
+    try {
+        let data=await article.find({_id: req.query.id});
         res.json({ data: data, code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+router.get('/getArticleList', async(req,res)=>{
+    try {
+        let articles=await articleLabel.find({label_id: req.query.id})
+        let list=[];
+        for (let i = 0; i < articles.length; i++) {
+            let item = articles[i],
+                query = await article.findOne({ _id: item.article_id,draft: false }).lean();
+            list.push(query)
+        }
+        res.json({ data: list, code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);
@@ -167,27 +227,6 @@ router.get('/deleteArticle', FindToken, async(req,res)=>{
     try {
         console.log(req.query.id);
         await article.find({_id: req.query.id}).remove();
-        res.json({ data: '', code: 200, msg: '成功' })
-    }
-    catch (err){
-        console.log(err);
-        res.json({ data: '', code: 500, msg: '服务器错误' })
-    }
-});
-
-router.post('/updateArticle',FindToken, async(req,res)=>{
-    try {
-        let body=req.body;
-        let articleId=body.id;
-        let data={
-            date: body.data,
-            title: body.title,
-            draft: body.draft,
-            abstract: body.abstract,
-            content: content,
-            initContent: initContent
-        };
-        await article.findByIdAndUpdate(articleId,data);
         res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
@@ -227,11 +266,6 @@ router.get('/getComment', async(req,res)=>{
         res.json({ data: '', code: 500, msg: '服务器错误' })
     }
 });
-
-
-
-
-
 
 
 module.exports = router;
