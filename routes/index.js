@@ -250,14 +250,27 @@ router.post('/saveComment', async(req,res)=>{
     try {
         let body=req.body;
         let data={
+            articleId: body.articleId,
             replyId: body.replyId,
             toUserName:  body.toUserName,
             email: body.email,
-            replyTime: body.replyTime,
+            replyTime: '',
             isAdmin: body.isAdmin,
             content: body.content,
             state: body.state
         };
+        let date = new Date(),
+            year = date.getFullYear(),
+            month = date.getMonth(),
+            day = date.getDate(),
+            hours = date.getHours(),
+            min = date.getMinutes();
+        month = (month + 1) < 10 ? '0' + (month + 1) : (month + 1);
+        day = day < 10 ? '0' + day : day;
+        hours = hours < 10 ? '0' + hours : hours;
+        min = min < 10 ? '0' + min : min;
+        date = year + '-' + month + '-' + day + ' ' + hours + ':' + min;
+        data.replyTime = date;
         await new articleComment(data).save();
         res.json({ data: '', code: 200, msg: '成功' })
     }
@@ -267,9 +280,11 @@ router.post('/saveComment', async(req,res)=>{
     }
 });
 
+// 通过id获取留言
 router.get('/getComment', async(req,res)=>{
     try {
-        let data=await articleComment().find();
+        let id = req.query.id;
+        let data = await articleComment.find({articleId: id});
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
@@ -277,6 +292,45 @@ router.get('/getComment', async(req,res)=>{
         res.json({ data: '', code: 500, msg: '服务器错误' })
     }
 });
+
+// 获取所有留言
+router.get('/getAllComment', async(req,res)=>{
+    try {
+        const page=req.query.page;
+        const allData = await articleComment.find();
+        const data = allData.slice((page-1)*10,page*10);
+        res.json({ data: {data:data,total:allData.length}, code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+
+// 通过id删除留言
+router.get('/deleteComment', async(req,res)=>{
+    try {
+        let id = req.query.id;
+        await articleComment.find({_id: id}).remove();
+        res.json({ data: '', code: 200, msg: '成功' })
+    }
+    catch (err){
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+});
+// 修改留言状态
+router.get('/changeState', async(req, res) => {
+    try {
+        const queryData = await articleComment.findOne({ _id: req.query.id });
+        queryData.state = req.query.state;
+        await queryData.save();
+        res.json({ code: 200, msg: '操作成功', data: '' })
+    } catch (err) {
+        console.log(err);
+        res.json({ data: '', code: 500, msg: '服务器错误' })
+    }
+})
 
 
 module.exports = router;
