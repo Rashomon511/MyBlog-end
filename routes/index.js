@@ -271,6 +271,7 @@ router.post('/saveComment', async(req,res)=>{
         min = min < 10 ? '0' + min : min;
         date = year + '-' + month + '-' + day + ' ' + hours + ':' + min;
         data.replyTime = date;
+        console.log(date)
         await new articleComment(data).save();
         res.json({ data: '', code: 200, msg: '成功' })
     }
@@ -284,7 +285,7 @@ router.post('/saveComment', async(req,res)=>{
 router.get('/getComment', async(req,res)=>{
     try {
         let id = req.query.id;
-        let data = await articleComment.find({articleId: id});
+        let data = await articleComment.find({articleId: id, state: true});
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
