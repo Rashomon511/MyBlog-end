@@ -23,7 +23,7 @@ const decodeToken = (token,callback) => {
 
 //需要验证token的中间件
 const FindToken = (req, res, next) => {
-    let token = req.headers['authorization'];
+    const token = req.headers['authorization'];
     decodeToken(token, type => {
         if (!type) {
             //token过期
@@ -38,10 +38,10 @@ router.post('/login', async(req, res)=>{
     try{
         const userName=req.body.userName;
         const password=req.body.password;
-        let data = await user.find({userName: userName, password: md5(password)});
+        const data = await user.find({userName: userName, password: md5(password)});
         if (data.length > 0) {
             //生成token 时间一周
-            let token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), userName: userName, password: password }, secret);
+            const token = jwt.sign({ exp: Math.floor(Date.now() / 1000) + (7 * 60 * 60), userName: userName, password: password }, secret);
 
             res.json({ code: 200, msg: '登录成功', result: {token: token, auth: data[0].auth }  });
         } else {
@@ -57,7 +57,7 @@ router.post('/login', async(req, res)=>{
 // 获取标签
 router.get('/getTags', async(req,res)=>{
     try {
-        let data=await tags.find();
+        const data=await tags.find();
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
@@ -69,11 +69,11 @@ router.get('/getTags', async(req,res)=>{
 // 新建标签
 router.post('/createTags',FindToken,  async(req,res)=>{
     try {
-        let body=req.body;
-        let data={
+        const body=req.body;
+        const data={
             content: body.content
         };
-        let tag = await tags.find(data);
+        const tag = await tags.find(data);
         if(tag.length === 0){
             await new tags(data).save();
             res.json({ data: '', code: 200, msg: '成功' })
@@ -90,7 +90,7 @@ router.post('/createTags',FindToken,  async(req,res)=>{
 // 删除标签
 router.post('/deleteTags',FindToken,  async(req,res)=>{
     try {
-        let body=req.body;
+        const body=req.body;
         await tags.find({_id: body.id}).remove();
         res.json({ data: '', code: 200, msg: '成功' })
     }
@@ -103,7 +103,7 @@ router.post('/deleteTags',FindToken,  async(req,res)=>{
 // 获取简历
 router.get('/getResume', async(req,res)=>{
     try {
-        let data= await resume.findOne();
+        const data= await resume.findOne();
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
@@ -115,9 +115,9 @@ router.get('/getResume', async(req,res)=>{
 // 提交简历
 router.post('/saveResume',FindToken, async(req,res)=>{
     try {
-        let body=req.body;
-        let id=body.id;
-        let data={
+        const body=req.body;
+        const id=body.id;
+        const data={
             content: body.content, //转换后显示的内容
         };
         await resume.findByIdAndUpdate(id, data);
@@ -203,7 +203,7 @@ router.get('/getArticle', async(req,res)=>{
 
 router.get('/getArticleById', async(req,res)=>{
     try {
-        let data=await article.find({_id: req.query.id});
+        const data=await article.find({_id: req.query.id});
         res.json({ data: data, code: 200, msg: '成功' })
     }
     catch (err){
@@ -215,7 +215,7 @@ router.get('/getArticleById', async(req,res)=>{
 router.get('/getArticleList', async(req,res)=>{
     try {
         const page=req.query.page;
-        let articles=await articleLabel.find({label_id: req.query.id});
+        const articles=await articleLabel.find({label_id: req.query.id});
         let list=[];
         for (let i = 0; i < articles.length; i++) {
             let item = articles[i],
@@ -248,8 +248,8 @@ router.get('/deleteArticle', FindToken, async(req,res)=>{
 
 router.post('/saveComment', async(req,res)=>{
     try {
-        let body=req.body;
-        let data={
+        const body=req.body;
+        const data={
             articleId: body.articleId,
             replyId: body.replyId,
             toUserName:  body.toUserName,
@@ -271,7 +271,6 @@ router.post('/saveComment', async(req,res)=>{
         min = min < 10 ? '0' + min : min;
         date = year + '-' + month + '-' + day + ' ' + hours + ':' + min;
         data.replyTime = date;
-        console.log(date)
         await new articleComment(data).save();
         res.json({ data: '', code: 200, msg: '成功' })
     }
@@ -284,9 +283,36 @@ router.post('/saveComment', async(req,res)=>{
 // 通过id获取留言
 router.get('/getComment', async(req,res)=>{
     try {
-        let id = req.query.id;
-        let data = await articleComment.find({articleId: id, state: true});
-        res.json({ data: data, code: 200, msg: '成功' })
+        const id = req.query.id;
+        const data = await articleComment.find({articleId: id, state: true});
+        const firstData = data.filter((item)=>{
+            return item.replyId === '';
+        });
+        let showData = firstData.concat().map((item)=>{
+            return {
+                _id: item._id,
+                articleId: item.articleId,
+                replyId: item.replyId,
+                toUserName: item.toUserName,
+                email: item.email,
+                replyTime: item.replyTime,
+                content: item.content,
+                state: item.state,
+                isAdmin: item.isAdmin,
+                childReply: [],
+            }
+        });
+        const replyData = data.filter((item)=>{
+            return item.replyId !== '';
+        });
+        for(let j=0;j<showData.length;j++){
+            for(let i=0;i<replyData.length;i++){
+                if(showData[j]._id == replyData[i].replyId){
+                    showData[j].childReply.push(replyData[i]);
+                }
+            }
+        }
+        res.json({ data: showData, code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);

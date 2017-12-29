@@ -43,7 +43,7 @@ app.all('*', function(req, res, next) {
 });
 
 app.use('/', index);
-
+mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost:27017/Blog',{useMongoClient: true}, function(err, res) {
     if (err) {
         console.log('ERROR: connecting to Database. ' + err);
