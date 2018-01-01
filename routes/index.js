@@ -302,8 +302,14 @@ router.get('/getComment', async(req,res)=>{
                 childReply: [],
             }
         });
+        showData.sort(function(a, b) {
+            return new Date(b.replyTime).getTime() - new Date(a.replyTime).getTime()
+        });
         const replyData = data.filter((item)=>{
             return item.replyId !== '';
+        });
+        replyData.sort(function(a, b) {
+            return new Date(b.replyTime).getTime() - new Date(a.replyTime).getTime()
         });
         for(let j=0;j<showData.length;j++){
             for(let i=0;i<replyData.length;i++){
@@ -325,6 +331,9 @@ router.get('/getAllComment', async(req,res)=>{
     try {
         const page=req.query.page;
         const allData = await articleComment.find();
+        allData.sort(function(a, b) {
+            return new Date(b.replyTime).getTime() - new Date(a.replyTime).getTime()
+        });
         const data = allData.slice((page-1)*10,page*10);
         res.json({ data: {data:data,total:allData.length}, code: 200, msg: '成功' })
     }
