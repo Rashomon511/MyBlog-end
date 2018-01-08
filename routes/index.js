@@ -121,6 +121,7 @@ router.post('/saveResume',FindToken, async(req,res)=>{
             content: body.content, //转换后显示的内容
         };
         await resume.findByIdAndUpdate(id, data);
+        //await new resume(data).save()
         res.json({ data: '', code: 200, msg: '成功' })
     }
     catch (err){
@@ -284,6 +285,7 @@ router.post('/saveComment', async(req,res)=>{
 router.get('/getComment', async(req,res)=>{
     try {
         const id = req.query.id;
+        const page = req.query.page;
         const data = await articleComment.find({articleId: id, state: true});
         const firstData = data.filter((item)=>{
             return item.replyId === '';
@@ -318,7 +320,8 @@ router.get('/getComment', async(req,res)=>{
                 }
             }
         }
-        res.json({ data: showData, code: 200, msg: '成功' })
+        const datas = showData.slice((page-1)*10,page*10);
+        res.json({ data: {data:datas,total:showData.length}, code: 200, msg: '成功' })
     }
     catch (err){
         console.log(err);
