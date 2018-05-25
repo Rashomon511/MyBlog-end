@@ -10,7 +10,7 @@
  
  ## 项目结构
  
- 
+```
 |-moddels     //数据库设计
 |----index.js  
 |---...
@@ -18,10 +18,14 @@
 |----index.js  //api接口
 |-app.js  		//一些配置，数据库连接
 |-index.js  		        //启动配制
- 
+```
+
 ## 启动
+
+```
 # install dependencies
 npm install
 
 # serve with hot reload at localhost:3000
 npm start
+```
