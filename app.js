@@ -55,10 +55,11 @@ mongoose.connect('mongodb://localhost:27017/Blog',{useMongoClient: true}, functi
 
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+
+app.use(function(req, res) {
+    res.set('Cache-Control', 'no-cache');
+    res.set('Content-Type', 'text/html');
+    res.sendfile('public/dist/index.html');
 });
 
 // error handler
