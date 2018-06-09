@@ -29,3 +29,4 @@ npm install
 # serve with hot reload at localhost:3000
 npm start
 ```
+更多内容，欢迎关注[blog](http://hexo.codehao.com/)
